@@ -1,3 +1,5 @@
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 use crate::style::TogglableButton;
 use iced::*;
 use std::sync::mpsc::Sender;
