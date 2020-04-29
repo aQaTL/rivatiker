@@ -2,6 +2,13 @@
 
 use crate::style::TogglableButton;
 use iced::*;
+use iced_native::{
+	input::{
+		keyboard::{self, KeyCode},
+		ButtonState,
+	},
+	Event,
+};
 use std::sync::mpsc::Sender;
 
 mod no_sleep;
@@ -21,6 +28,7 @@ fn main() {
 struct Rivatiker {
 	power_state: PowerState,
 	state_sender: Sender<no_sleep::State>,
+	key_press_lock: bool,
 }
 
 #[derive(Default)]
@@ -38,13 +46,15 @@ struct PowerButtonStates {
 #[derive(Debug, Clone)]
 enum Message {
 	PowerButtonState(no_sleep::State),
+	NativeEvent(Event),
 }
 
 impl Application for Rivatiker {
+	type Flags = ();
 	type Executor = executor::Default;
 	type Message = Message;
 
-	fn new() -> (Self, Command<Message>) {
+	fn new(_flags: Self::Flags) -> (Self, Command<Message>) {
 		(
 			Self {
 				power_state: PowerState {
@@ -55,6 +65,7 @@ impl Application for Rivatiker {
 					..Default::default()
 				},
 				state_sender: no_sleep::start_state_setter(no_sleep::State::Default),
+				key_press_lock: false,
 			},
 			Command::none(),
 		)
@@ -85,12 +96,68 @@ impl Application for Rivatiker {
 					println!("Error sending {:?}: {:?}", power_state, e);
 				}
 			}
+			Message::NativeEvent(Event::Keyboard(keyboard::Event::Input {
+				key_code: KeyCode::D,
+				state: ButtonState::Pressed,
+				..
+			})) => {
+				if self.key_press_lock {
+					return Command::none();
+				}
+				self.key_press_lock = true;
+				if self.power_state.button_states.default.1 == TogglableButton::Toggled {
+					self.update(Message::PowerButtonState(no_sleep::State::NoSystemSleep))
+				} else if self.power_state.button_states.no_system_sleep.1
+					== TogglableButton::Toggled
+				{
+					self.update(Message::PowerButtonState(no_sleep::State::NoMonitorSleep))
+				} else if self.power_state.button_states.no_monitor_sleep.1
+					== TogglableButton::Toggled
+				{
+					self.update(Message::PowerButtonState(no_sleep::State::Default))
+				} else {
+					panic!("Invalid button state");
+				};
+			}
+			Message::NativeEvent(Event::Keyboard(keyboard::Event::Input {
+				key_code: KeyCode::A,
+				state: ButtonState::Pressed,
+				..
+			})) => {
+				if self.key_press_lock {
+					return Command::none();
+				}
+				self.key_press_lock = true;
+				if self.power_state.button_states.default.1 == TogglableButton::Toggled {
+					self.update(Message::PowerButtonState(no_sleep::State::NoMonitorSleep))
+				} else if self.power_state.button_states.no_system_sleep.1
+					== TogglableButton::Toggled
+				{
+					self.update(Message::PowerButtonState(no_sleep::State::Default))
+				} else if self.power_state.button_states.no_monitor_sleep.1
+					== TogglableButton::Toggled
+				{
+					self.update(Message::PowerButtonState(no_sleep::State::NoSystemSleep))
+				} else {
+					panic!("Invalid button state");
+				};
+			}
+
+			Message::NativeEvent(Event::Keyboard(keyboard::Event::Input {
+				key_code,
+				state: ButtonState::Released,
+				..
+			})) if key_code == KeyCode::A || key_code == KeyCode::D => {
+				self.key_press_lock = false;
+			}
+
+			Message::NativeEvent(_) => (),
 		}
 		Command::none()
 	}
 
 	fn subscription(&self) -> Subscription<Message> {
-		Subscription::none()
+		iced_native::subscription::events().map(Message::NativeEvent)
 	}
 
 	fn view(&mut self) -> Element<Message> {
@@ -134,7 +201,7 @@ mod style {
 	use iced::widget::button;
 	use iced::*;
 
-	#[derive(Debug, Clone, Copy)]
+	#[derive(Debug, Clone, Copy, PartialEq)]
 	pub enum TogglableButton {
 		Toggled,
 		NotToggled,
