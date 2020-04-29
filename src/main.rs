@@ -151,6 +151,28 @@ impl Application for Rivatiker {
 				self.key_press_lock = false;
 			}
 
+			Message::NativeEvent(Event::Keyboard(keyboard::Event::Input {
+				key_code: KeyCode::Key1,
+				state: ButtonState::Pressed,
+				..
+			})) => {
+				self.update(Message::PowerButtonState(no_sleep::State::Default));
+			}
+			Message::NativeEvent(Event::Keyboard(keyboard::Event::Input {
+				key_code: KeyCode::Key2,
+				state: ButtonState::Pressed,
+				..
+			})) => {
+				self.update(Message::PowerButtonState(no_sleep::State::NoSystemSleep));
+			}
+			Message::NativeEvent(Event::Keyboard(keyboard::Event::Input {
+				key_code: KeyCode::Key3,
+				state: ButtonState::Pressed,
+				..
+			})) => {
+				self.update(Message::PowerButtonState(no_sleep::State::NoMonitorSleep));
+			}
+
 			Message::NativeEvent(_) => (),
 		}
 		Command::none()
