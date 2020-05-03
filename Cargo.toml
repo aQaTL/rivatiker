@@ -5,9 +5,22 @@ authors = ["aQaTL <mmsoltys@outlook.com>"]
 edition = "2018"
 license = "MIT"
 
+[lib]
+name = "nosleep"
+path = "src/no_sleep.rs"
+
+[[bin]]
+name = "rivatiker"
+path = "src/main.rs"
+required-features = ["gui"]
+
+[features]
+default = []
+gui= ["iced", "iced_native"]
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-iced = { git = "https://github.com/hecrj/iced", rev = "e0aa89cee764eebb1cb06f0b0653f82b337620ea", features = ["async-std", "debug"] }
-iced_native = { git = "https://github.com/hecrj/iced", rev = "e0aa89cee764eebb1cb06f0b0653f82b337620ea" }
+iced = { git = "https://github.com/hecrj/iced", rev = "e0aa89cee764eebb1cb06f0b0653f82b337620ea", features = ["async-std", "debug"], optional = true }
+iced_native = { git = "https://github.com/hecrj/iced", rev = "e0aa89cee764eebb1cb06f0b0653f82b337620ea", optional = true }
 winapi = { version = "0.3.8", features = ["winbase", "winnt"] }
