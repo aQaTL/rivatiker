@@ -6,7 +6,7 @@ edition = "2018"
 license = "MIT"
 
 [lib]
-name = "nosleep"
+name = "rivatiker"
 path = "src/no_sleep.rs"
 
 [[bin]]
