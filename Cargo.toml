@@ -21,6 +21,6 @@ gui= ["iced", "iced_native"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-iced = { git = "https://github.com/hecrj/iced", rev = "e0aa89cee764eebb1cb06f0b0653f82b337620ea", features = ["async-std", "debug"], optional = true }
-iced_native = { git = "https://github.com/hecrj/iced", rev = "e0aa89cee764eebb1cb06f0b0653f82b337620ea", optional = true }
+iced = { version = "0.1.1", features = ["async-std", "debug"], optional = true }
+iced_native = { version = "0.2.2", optional = true }
 winapi = { version = "0.3.8", features = ["winbase", "winnt"] }
